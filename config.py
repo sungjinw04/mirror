@@ -113,7 +113,7 @@ SEARCH_PLUGINS = [
     "https://raw.githubusercontent.com/khensolomon/leyts/master/yts.py",
 ]
 AUTHORIZED_CHATS = ""
-SUDO_USERS = "5702598840, 7682111251"
+SUDO_USERS = "8107397304, 7977941378, 8554153920"
 DATABASE_URL = ""
 STATUS_LIMIT = 10
 DEFAULT_UPLOAD = "rc"
