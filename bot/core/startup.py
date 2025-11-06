@@ -1,4 +1,4 @@
-from aiofiles.os import path as aiopath, remove, makedirs
+This is my startup.py from aiofiles.os import path as aiopath, remove, makedirs
 from aiofiles import open as aiopen
 from aioshutil import rmtree
 from asyncio import create_subprocess_exec, create_subprocess_shell
@@ -24,9 +24,6 @@ from .config_manager import Config
 from .mltb_client import TgClient
 
 
-# ============================================================
-# qBittorrent Options
-# ============================================================
 def update_qb_options():
     if not qbit_options:
         qbit_options.update(dict(qbittorrent_client.app_preferences()))
@@ -40,9 +37,6 @@ def update_qb_options():
         qbittorrent_client.app_set_preferences(qbit_options)
 
 
-# ============================================================
-# Aria2 Options
-# ============================================================
 def update_aria2_options():
     if not aria2_options:
         aria2_options.update(aria2.client.get_global_option())
@@ -50,17 +44,11 @@ def update_aria2_options():
         aria2.set_global_options(aria2_options)
 
 
-# ============================================================
-# NZB Options
-# ============================================================
 async def update_nzb_options():
     no = (await sabnzbd_client.get_config())["config"]["misc"]
     nzb_options.update(no)
 
 
-# ============================================================
-# Load Settings from Database
-# ============================================================
 async def load_settings():
     if await aiopath.exists("Thumbnails"):
         await rmtree("Thumbnails", ignore_errors=True)
@@ -160,9 +148,6 @@ async def load_settings():
             LOGGER.info("Rss data has been imported from Database.")
 
 
-# ============================================================
-# Save Settings
-# ============================================================
 async def save_settings():
     if database.db is None:
         return
@@ -184,11 +169,7 @@ async def save_settings():
         )
 
 
-# ============================================================
-# ✅ Updated Safe Version of update_variables()
-# ============================================================
 async def update_variables():
-    # Leech split safety
     if (
         Config.LEECH_SPLIT_SIZE > TgClient.MAX_SPLIT_SIZE
         or Config.LEECH_SPLIT_SIZE == 2097152000
@@ -201,7 +182,6 @@ async def update_variables():
         Config.USER_TRANSMISSION and TgClient.IS_PREMIUM_USER
     )
 
-    # Authorized chats
     if Config.AUTHORIZED_CHATS:
         aid = Config.AUTHORIZED_CHATS.split()
         for id_ in aid:
@@ -213,32 +193,22 @@ async def update_variables():
             else:
                 user_data[chat_id] = {"is_auth": True}
 
-    # ✅ Safe SUDO user handling (prevents ValueError crash)
     if Config.SUDO_USERS:
-        raw_ids = Config.SUDO_USERS.replace(",", " ").split()
-        for id_ in raw_ids:
-            id_ = id_.strip()
-            if not id_:
-                continue
-            try:
-                user_data[int(id_)] = {"is_sudo": True}
-            except ValueError:
-                LOGGER.warning(f"⚠️ Skipping invalid SUDO user ID: {id_}")
+        aid = Config.SUDO_USERS.split()
+        for id_ in aid:
+            user_data[int(id_.strip())] = {"is_sudo": True}
 
-    # Extension filter
     if Config.EXTENSION_FILTER:
         fx = Config.EXTENSION_FILTER.split()
         for x in fx:
             x = x.lstrip(".")
             extension_filter.append(x.strip().lower())
 
-    # GDrive configuration
     if Config.GDRIVE_ID:
         drives_names.append("Main")
         drives_ids.append(Config.GDRIVE_ID)
         index_urls.append(Config.INDEX_URL)
 
-    # Load additional drives from file
     if await aiopath.exists("list_drives.txt"):
         async with aiopen("list_drives.txt", "r+") as f:
             lines = await f.readlines()
@@ -252,10 +222,8 @@ async def update_variables():
                     index_urls.append("")
 
 
-# ============================================================
-# Load Configurations
-# ============================================================
 async def load_configurations():
+
     if not await aiopath.exists(".netrc"):
         async with aiopen(".netrc", "w"):
             pass
@@ -292,4 +260,3 @@ async def load_configurations():
 
     if not await aiopath.exists("accounts"):
         Config.USE_SERVICE_ACCOUNTS = False
-
